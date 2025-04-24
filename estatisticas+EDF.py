@@ -7,23 +7,23 @@ Original file is located at
     https://colab.research.google.com/drive/1H6jiuBR4MOQi8Sz5FMf_AL8R4cUQsrSl
 """
 
-# Simulador de escalonamento com algoritmos de tempo real: Rate Monotonic (RM) e EDF
+# Pessoa 3: Simulação e Estatísticas com logs, FCFS, Rate Monotonic e EDF
 import random
 
 # Classe para representar um processo
 class Processo:
     def __init__(self, pid, chegada, burst, periodo):
-        self.pid = pid                    # Identificador do processo
-        self.chegada = chegada            # Tempo em que o processo se torna disponível
-        self.burst = burst                # Tempo necessário de CPU
-        self.periodo = periodo            # Período do processo (define deadline em RM)
-        self.deadline = chegada + periodo  # Deadline absoluto inicial
-        self.restante = burst             # Tempo restante de execução
-        self.inicio = None                # Tempo de início da execução
-        self.fim = None                   # Tempo de término da execução
+        self.pid = pid
+        self.chegada = chegada
+        self.burst = burst
+        self.periodo = periodo
+        self.deadline = chegada + periodo
+        self.restante = burst
+        self.inicio = None
+        self.fim = None
         self.estado = "novo"
 
-# Função para gerar processos periódicos de tempo real
+# Gerar processos periódicos de tempo real
 def gerar_processos_reais(qtd):
     processos = []
     for i in range(1, qtd + 1):
@@ -33,16 +33,64 @@ def gerar_processos_reais(qtd):
         processos.append(Processo(i, chegada, burst, periodo))
     return processos
 
-# Função para simular escalonamento com Rate Monotonic
+# Sistema de logs
+def log(mensagem):
+    print(mensagem)
+    with open("logs.txt", "a") as f:
+        f.write(mensagem + "\n")
+
+# Simulação FCFS com controle de tempo e estado
+def simular_fcfs(processos, tempo_max):
+    tempo = 0
+    fila_prontos = []
+    processo_atual = None
+    tempo_cpu = 0
+    processos_ativos = processos.copy()
+    deadline_misses = 0
+
+    with open("logs.txt", "w") as f:
+        f.write("")
+
+    while tempo < tempo_max and (processo_atual or processos_ativos):
+        for p in processos:
+            if p.chegada == tempo:
+                p.estado = "pronto"
+                fila_prontos.append(p)
+                log(f"Tempo {tempo}: Processo {p.pid} chegou")
+
+        if not processo_atual and fila_prontos:
+            processo_atual = fila_prontos.pop(0)
+            processo_atual.estado = "executando"
+            processo_atual.inicio = tempo
+            log(f"Tempo {tempo}: Processo {processo_atual.pid} começou execução")
+
+        if processo_atual:
+            processo_atual.restante -= 1
+            tempo_cpu += 1
+            if processo_atual.restante == 0:
+                processo_atual.estado = "terminado"
+                processo_atual.fim = tempo + 1
+                log(f"Tempo {tempo + 1}: Processo {processo_atual.pid} terminou")
+                if processo_atual.fim > processo_atual.deadline:
+                    deadline_misses += 1
+                processos_ativos.remove(processo_atual)
+                processo_atual = None
+
+        tempo += 1
+
+    return processos, tempo, tempo_cpu, deadline_misses
+
+# Simulação Rate Monotonic
 def simulador_rate_monotonic(processos, tempo_max):
     tempo = 0
     fila = processos.copy()
     tempo_ocupado = 0
     processos_executados = []
+    deadline_misses = 0
 
     while tempo < tempo_max:
         prontos = [p for p in fila if p.chegada <= tempo and p.restante > 0]
-        prontos.sort(key=lambda p: p.periodo)  # Menor período = maior prioridade
+        prontos.sort(key=lambda p: p.periodo)
 
         if prontos:
             p = prontos[0]
@@ -52,18 +100,21 @@ def simulador_rate_monotonic(processos, tempo_max):
             tempo_ocupado += 1
             if p.restante == 0:
                 p.fim = tempo + 1
+                if p.fim > p.deadline:
+                    deadline_misses += 1
                 processos_executados.append(p)
 
         tempo += 1
 
-    return processos_executados, tempo, tempo_ocupado
+    return processos_executados, tempo, tempo_ocupado, deadline_misses
 
-# Função para simular escalonamento com EDF (Earliest Deadline First)
+# Simulação EDF
 def simulador_edf(processos, tempo_max):
     tempo = 0
     fila = processos.copy()
     tempo_ocupado = 0
     processos_executados = []
+    deadline_misses = 0
 
     while tempo < tempo_max:
         prontos = [p for p in fila if p.chegada <= tempo and p.restante > 0]
@@ -77,14 +128,16 @@ def simulador_edf(processos, tempo_max):
             tempo_ocupado += 1
             if p.restante == 0:
                 p.fim = tempo + 1
+                if p.fim > p.deadline:
+                    deadline_misses += 1
                 processos_executados.append(p)
 
         tempo += 1
 
-    return processos_executados, tempo, tempo_ocupado
+    return processos_executados, tempo, tempo_ocupado, deadline_misses
 
-# Função para calcular estatísticas de desempenho
-def calcular_estatisticas(processos, tempo_total, tempo_ocupado):
+# Estatísticas de desempenho
+def calcular_estatisticas(processos, tempo_total, tempo_cpu, deadline_misses):
     tempos_espera = []
     tempos_retorno = []
 
@@ -96,7 +149,7 @@ def calcular_estatisticas(processos, tempo_total, tempo_ocupado):
 
     media_espera = sum(tempos_espera) / len(tempos_espera)
     media_retorno = sum(tempos_retorno) / len(tempos_retorno)
-    utilizacao = tempo_ocupado / tempo_total if tempo_total > 0 else 0
+    utilizacao = tempo_cpu / tempo_total if tempo_total > 0 else 0
     throughput = len(processos) / tempo_total if tempo_total > 0 else 0
 
     print("\nEstatísticas:")
@@ -104,18 +157,23 @@ def calcular_estatisticas(processos, tempo_total, tempo_ocupado):
     print(f"Tempo médio de retorno: {media_retorno:.2f}")
     print(f"Utilização da CPU: {utilizacao:.2%}")
     print(f"Throughput: {throughput:.2f} processos/unidade de tempo")
+    print(f"Erros de deadline: {deadline_misses}")
 
-# Execução do simulador com ambos os algoritmos
+# Execução principal
 if __name__ == "__main__":
     random.seed(42)
     processos = gerar_processos_reais(5)
 
-    print("--- Rate Monotonic ---")
-    prontos_rm, tempo_rm, cpu_rm = simulador_rate_monotonic(processos, 20)
-    calcular_estatisticas(prontos_rm, tempo_rm, cpu_rm)
+    print("--- FCFS ---")
+    exec_fcfs, tempo_fcfs, cpu_fcfs, misses_fcfs = simular_fcfs(processos, 20)
+    calcular_estatisticas(exec_fcfs, tempo_fcfs, cpu_fcfs, misses_fcfs)
 
-    # Regenerar processos (para garantir mesmas características)
     processos = gerar_processos_reais(5)
-    print("\n--- EDF (Earliest Deadline First) ---")
-    prontos_edf, tempo_edf, cpu_edf = simulador_edf(processos, 20)
-    calcular_estatisticas(prontos_edf, tempo_edf, cpu_edf)
+    print("\n--- Rate Monotonic ---")
+    exec_rm, tempo_rm, cpu_rm, misses_rm = simulador_rate_monotonic(processos, 20)
+    calcular_estatisticas(exec_rm, tempo_rm, cpu_rm, misses_rm)
+
+    processos = gerar_processos_reais(5)
+    print("\n--- EDF ---")
+    exec_edf, tempo_edf, cpu_edf, misses_edf = simulador_edf(processos, 20)
+    calcular_estatisticas(exec_edf, tempo_edf, cpu_edf, misses_edf)
