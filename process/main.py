@@ -27,3 +27,9 @@ def exemplo():
 if __name__ == "__main__":
     exemplo()
 
+
+"""
+Este ficheiro é geralmente o ponto de entrada para a execução do programa. 
+Ele pode organizar a simulação, importar os módulos necessários e
+orquestrar o processo de geração, execução e registo dos processos.
+"""
