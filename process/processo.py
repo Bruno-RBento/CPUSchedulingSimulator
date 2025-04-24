@@ -10,3 +10,9 @@ class Processo:
         self.tempo_inicio = None  # Quando começou a execução
         self.tempo_conclusao = None  # Quando terminou
 
+"""
+Este ficheiro define a classe Processo, que representa cada processo na simulação. 
+A classe contém atributos como o ID do processo (PID), tempo de chegada, tempo de execução, 
+tempo restante, prioridade, prazo, entre outros. Esta classe ajuda a estruturar os dados de cada processo 
+para que possam ser manipulados e simulados no escalonador.
+"""
