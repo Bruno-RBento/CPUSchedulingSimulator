@@ -47,3 +47,11 @@ def gerar_processos(qtd_processos, configuracao_distribuicao, primeiro_pid=1):
 
     return processos  # Retorna a lista de processos gerados
 
+
+"""
+Este ficheiro tem a função de gerar os processos. 
+Através de configurações e distribuições probabilísticas (como Poisson, Exponencial, Normal), 
+ele cria processos com tempos de chegada, tempos de execução, prioridades, entre outros atributos.
+O objetivo é simular a chegada de processos que o escalonador irá gerenciar.
+"""
+
