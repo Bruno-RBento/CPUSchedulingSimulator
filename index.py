@@ -13,6 +13,7 @@ from importcsv  import importar_csv
 from algoritmos import (
     FCFS,
     FCFS2,
+    FCFS3_lista_objetos,
     roundRobin,
     shortestJob,
     Priority_Scheduling_Preemptivo,
@@ -56,16 +57,27 @@ def alternar_modo(modo):
 def gerar_processos(tipo):
     messagebox.showinfo("Gerar", f"Gerar processos {tipo} com distribuições selecionadas.")
 
+
+def converter_processos_para_tabela(processos):
+    """
+    Converte objetos Processo em tuplas legíveis para a TreeView.
+    """
+    return [
+        (
+            p.pid,
+            p.tempo_chegada,
+            p.tempo_execucao,
+            p.prioridade if p.prioridade is not None else '-',
+            p.periodo if p.periodo is not None else '-'
+        )
+        for p in processos
+    ]
+
+
 def update_process_queue():
     queue_box.delete(*queue_box.get_children())
-    for p in processos:
-        queue_box.insert('', 'end', values=(
-            p.get('id', '-'),
-            p.get('start', '-'),
-            p.get('burst', '-'),
-            p.get('priority', '-'),
-            p.get('period', '-')  # só terá valor se for periódico
-        ))
+    for linha in converter_processos_para_tabela(processos):
+        queue_box.insert('', 'end', values=linha)
         
 def on_algorithm_selected(event=None):
     algoritmo = algorithm_var.get()
@@ -113,33 +125,32 @@ def iniciar_simulacao():
         messagebox.showwarning("Aviso", "Nenhum processo carregado ou gerado!")
         return
 
-    gantt_data = []
-    current_time = 0
-
     if tipo == "aperiodico":
         if algoritmo.startswith("First-Come"):
-            dados = [(i + 1, p["burst"]) for i, p in enumerate(processos)]
-            FCFS2(dados)
-
-            for p in processos:
-                start = current_time
-                end = current_time + p["burst"]
-                gantt_data.append({"id": p["id"], "start": start, "end": end})
-                current_time = end
+            gantt_data = FCFS3_lista_objetos(processos)
             mostrar_gantt(gantt_data)
 
         elif algoritmo.startswith("Shortest Job"):
-            dados = sorted(processos, key=lambda p: p["burst"])
-            for p in dados:
-                start = current_time
-                end = current_time + p["burst"]
-                gantt_data.append({"id": p["id"], "start": start, "end": end})
-                current_time = end
-            shortestJob([(i+1, p["burst"]) for i, p in enumerate(dados)])
+            processos_ordenados = sorted(processos, key=lambda p: p.tempo_execucao)
+            gantt_data = FCFS2(processos_ordenados)  # ou um algoritmo próprio
             mostrar_gantt(gantt_data)
+
+        # Exemplo para Round Robin:
+        elif algoritmo.startswith("Round Robin"):
+            try:
+                quantum = int(quantum_var.get())
+            except ValueError:
+                messagebox.showerror("Erro", "Por favor, insere um valor válido para o quantum.")
+                return
+
+            gantt_data = roundRobin(processos, quantum)
+            mostrar_gantt(gantt_data)
+
+        # Outros algoritmos podem seguir a mesma lógica...
 
     elif tipo == "periodico":
         messagebox.showinfo("Aviso", f"O algoritmo '{algoritmo}' será aplicado a processos periódicos — a simulação ainda não está implementada aqui.")
+
 
 # Scheduling Algorithm
 ttk.Label(main_frame, text="Scheduling Algorithm").pack(pady=5)

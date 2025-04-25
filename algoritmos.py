@@ -1,6 +1,24 @@
 import time
 import random
 
+def FCFS3_lista_objetos(lista_processos):
+    tempo_atual = 0
+    ordem_execucao = []
+
+    for proc in lista_processos:
+        inicio = tempo_atual
+        fim = inicio + proc.tempo_execucao
+        proc.tempo_inicio = inicio
+        proc.tempo_conclusao = fim
+        ordem_execucao.append({
+            "id": proc.pid,
+            "start": inicio,
+            "end": fim
+        })
+        tempo_atual = fim
+
+    return ordem_execucao
+
 
 def FCFS2(lista_processos):
     """

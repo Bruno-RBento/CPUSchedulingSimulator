@@ -1,5 +1,6 @@
-import csv
 from tkinter import filedialog, messagebox
+import csv
+from processo import Processo  # importa tua classe Processo
 
 def importar_csv(processos, tipo_processo_var, update_process_queue):
     tipo = tipo_processo_var.get()
@@ -23,7 +24,9 @@ def importar_csv(processos, tipo_processo_var, update_process_queue):
                         start = float(row[1])
                         burst = float(row[2])
                         priority = int(row[3])
-                        processos.append({"id": pid, "start": start, "burst": burst, "priority": priority})
+                        proc = Processo(pid, start, burst, priority)
+                        processos.append(proc)
+
             elif tipo == "periodico":
                 for row in leitor:
                     if len(row) >= 4:
@@ -31,9 +34,11 @@ def importar_csv(processos, tipo_processo_var, update_process_queue):
                         start = float(row[1])
                         burst = float(row[2])
                         period = float(row[3])
-                        processos.append({"id": pid, "start": start, "burst": burst, "period": period})
+                        proc = Processo(pid, start, burst, prioridade=0, periodo=period)
+                        processos.append(proc)
 
             messagebox.showinfo("Importado", f"{len(processos)} processos {tipo} importados com sucesso.")
             update_process_queue()
+
     except Exception as e:
         messagebox.showerror("Erro ao importar", f"Ocorreu um erro: {e}")
