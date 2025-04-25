@@ -137,21 +137,24 @@ def iniciar_simulacao():
             mostrar_gantt(gantt_data)
 
         elif algoritmo.startswith("Shortest Job"):
-            processos_ordenados = sorted(processos, key=lambda p: p.tempo_execucao)
-            gantt_data = FCFS2(processos_ordenados)  # ou um algoritmo próprio
-            mostrar_gantt(gantt_data)
-
+            return
         # Exemplo para Round Robin:
         elif algoritmo.startswith("Round Robin"):
-            try:
-                quantum = int(quantum_var.get())
-            except ValueError:
-                messagebox.showerror("Erro", "Por favor, insere um valor válido para o quantum.")
                 return
+            
+        elif algoritmo.startswith("Priority Preemptive"):
+            return
+        
+        elif algoritmo.startswith("Priority Non-Preemptive"):
+            return
 
-            gantt_data = roundRobin(processos, quantum)
-            mostrar_gantt(gantt_data)
-
+    elif tipo == "periodico":
+        if algoritmo.startswith("RT Rate Monotonic"):
+            return
+        elif algoritmo.startswith("EDF (Earliest Deadline First)"):
+            return
+        elif algoritmo.startswith("Multilevel Queue Scheduling"):
+            return
         # Outros algoritmos podem seguir a mesma lógica...
 
     elif tipo == "periodico":
@@ -225,21 +228,20 @@ for col in ("ID", "Chegada", "Burst", "Prioridade", "Período"):
     queue_box.heading(col, text=col)
     queue_box.column(col, anchor='center', width=100)  # define largura e alinhamento
 
-
 queue_box.pack(pady=10, fill='x')
 
+"""
 exec_label = ttk.Label(right_frame, text="Lista de Execução (Durante Simulação)")
 exec_label.pack()
 
 exec_box = ttk.Treeview(right_frame, columns=("Tempo", "PID", "Ação"), show='headings')
 for col in ("Tempo", "PID", "Ação"):
     exec_box.heading(col, text=col)
-    exec_box.column(col, anchor='center', width=120)
+    exec_box.column(col, anchor='center', width=120) 
+
 
 exec_box.pack(pady=10, fill='x')
-
-
-
+    """
 frame_gantt = ttk.LabelFrame(root, text="Gráfico Gantt")
 frame_gantt.pack(fill='both', expand=True, padx=10, pady=10)
 
