@@ -42,6 +42,15 @@ processos = []
 main_frame = ttk.Frame(root)
 main_frame.pack(pady=10)
 
+columns_frame = ttk.Frame(root)
+columns_frame.pack(fill='both', expand=True, padx=10, pady=10)
+
+left_frame = ttk.Frame(columns_frame)
+left_frame.pack(side='left', fill='y', expand=False, padx=(0, 10))
+
+right_frame = ttk.Frame(columns_frame)
+right_frame.pack(side='right', fill='both', expand=True)
+
 
 def alternar_modo(modo):
     tipo_frame.pack_forget()
@@ -150,14 +159,14 @@ def iniciar_simulacao():
 
 
 # Scheduling Algorithm
-ttk.Label(main_frame, text="Scheduling Algorithm").pack(pady=5)
-algorithm_menu = ttk.Combobox(main_frame, textvariable=algorithm_var, state="readonly")
+ttk.Label(left_frame, text="Scheduling Algorithm").pack(pady=5)
+algorithm_menu = ttk.Combobox(left_frame, textvariable=algorithm_var, state="readonly")
 algorithm_menu['values'] = ["First-Come, First-Served (FCFS)", "Shortest Job (SJ)", "Priority Preemptive","Priority  Non-Preemptive", "Round Robin (RR)", "RT Rate Monotonic", "EDF (Earliest Deadline First)", "Multilevel Queue Scheduling"]
 algorithm_menu.pack()
 algorithm_menu.bind("<<ComboboxSelected>>", on_algorithm_selected)
 
 # Time controls
-time_frame = ttk.Frame(main_frame)
+time_frame = ttk.Frame(left_frame)
 time_frame.pack(pady=10)
 
 ttk.Label(time_frame, text="Tempo Máximo").grid(row=0, column=0, padx=5, sticky='w')
@@ -169,31 +178,31 @@ process_count_entry = ttk.Entry(time_frame, textvariable=process_count_var, widt
 process_count_entry.grid(row=1, column=1, padx=5)
 
 # Quantum
-quantum_frame = ttk.Frame(main_frame)
+quantum_frame = ttk.Frame(left_frame)
 quantum_frame.pack(pady=10)
 ttk.Label(quantum_frame, text="Time Quantum (for Round Robin scheduling)").grid(row=0, column=0, sticky="w")
 quantum_entry = ttk.Entry(quantum_frame, textvariable=quantum_var, width=20, state='disabled')
 quantum_entry.grid(row=1, column=0, pady=5)
 
 # Modo de Entrada
-entrada_frame = ttk.LabelFrame(main_frame, text="Modo de Entrada de Processos")
+entrada_frame = ttk.LabelFrame(left_frame, text="Modo de Entrada de Processos")
 entrada_frame.pack(pady=10, fill='x', padx=10)
 
 ttk.Radiobutton(entrada_frame, text="Importar de CSV", variable=modo_entrada_var, value="importar", command=lambda: alternar_modo("importar")).pack(anchor='w', padx=10)
 ttk.Radiobutton(entrada_frame, text="Gerar Aleatoriamente", variable=modo_entrada_var, value="gerar", command=lambda: alternar_modo("gerar")).pack(anchor='w', padx=10)
 
 # Tipo de processo
-tipo_frame = ttk.LabelFrame(main_frame, text="Tipo de Processo")
+tipo_frame = ttk.LabelFrame(left_frame, text="Tipo de Processo")
 ttk.Radiobutton(tipo_frame, text="Geral/Aperiódico", variable=tipo_processo_var, value="aperiodico").pack(anchor='w', padx=10)
 ttk.Radiobutton(tipo_frame, text="Periódico (Tempo Real)", variable=tipo_processo_var, value="periodico").pack(anchor='w', padx=10)
 
 # Frame de importação
-import_frame = ttk.Frame(main_frame)
+import_frame = ttk.Frame(left_frame)
 import_button = ttk.Button(import_frame, text="Importar CSV", command=lambda: importar_csv(processos, tipo_processo_var, update_process_queue))
 import_button.pack()
 
 # Frame de geração
-gerar_frame = ttk.LabelFrame(main_frame, text="Parâmetros de Geração Aleatória")
+gerar_frame = ttk.LabelFrame(left_frame, text="Parâmetros de Geração Aleatória")
 
 ttk.Label(gerar_frame, text="Distribuição de Chegada").grid(row=0, column=0, sticky='w')
 ttk.Combobox(gerar_frame, textvariable=arrival_dist_var, values=["Poisson", "Exponential"], state='readonly').grid(row=0, column=1, padx=5)
@@ -208,16 +217,28 @@ start_button = ttk.Button(root, text="Iniciar Simulação", command=lambda: inic
 start_button.pack(pady=20)
 
 
-queue_label = ttk.Label(main_frame, text="Fila de Processos")
+queue_label = ttk.Label(right_frame, text="Fila de Processos")
 queue_label.pack()
 
-queue_box = ttk.Treeview(main_frame, columns=("ID", "Chegada", "Burst", "Prioridade", "Período"), show='headings')
+queue_box = ttk.Treeview(right_frame, columns=("ID", "Chegada", "Burst", "Prioridade", "Período"), show='headings')
 for col in ("ID", "Chegada", "Burst", "Prioridade", "Período"):
     queue_box.heading(col, text=col)
     queue_box.column(col, anchor='center', width=100)  # define largura e alinhamento
 
 
 queue_box.pack(pady=10, fill='x')
+
+exec_label = ttk.Label(right_frame, text="Lista de Execução (Durante Simulação)")
+exec_label.pack()
+
+exec_box = ttk.Treeview(right_frame, columns=("Tempo", "PID", "Ação"), show='headings')
+for col in ("Tempo", "PID", "Ação"):
+    exec_box.heading(col, text=col)
+    exec_box.column(col, anchor='center', width=120)
+
+exec_box.pack(pady=10, fill='x')
+
+
 
 frame_gantt = ttk.LabelFrame(root, text="Gráfico Gantt")
 frame_gantt.pack(fill='both', expand=True, padx=10, pady=10)
