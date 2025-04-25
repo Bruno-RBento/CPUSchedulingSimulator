@@ -88,11 +88,13 @@ def on_algorithm_selected(event=None):
 
 
 def mostrar_gantt(dados):
+    for widget in frame_gantt.winfo_children():
+        widget.destroy()
+
     if not dados:
         messagebox.showwarning("Aviso", "Nenhum dado para mostrar!")
         return
 
-    # Converter os dados da simulação para o formato necessário
     processos_convertidos = [
         {
             "Processo": f"P{p['id']}",
@@ -102,19 +104,14 @@ def mostrar_gantt(dados):
         for p in dados
     ]
 
-    # Gerar imagem do gráfico
     imagem_path = gerar_grafico_png(processos_convertidos)
-
-    # Mostrar imagem em nova janela Tkinter
-    janela = tk.Toplevel()
-    janela.title("Gantt Chart")
-
     imagem = Image.open(imagem_path)
     imagem_tk = ImageTk.PhotoImage(imagem)
 
-    label = tk.Label(janela, image=imagem_tk)
-    label.image = imagem_tk  # evitar garbage collection
+    label = tk.Label(frame_gantt, image=imagem_tk)
+    label.image = imagem_tk
     label.pack(padx=10, pady=10)
+
 
 def iniciar_simulacao():
     modo = modo_entrada_var.get()
@@ -221,6 +218,9 @@ for col in ("ID", "Chegada", "Burst", "Prioridade", "Período"):
 
 
 queue_box.pack(pady=10, fill='x')
+
+frame_gantt = ttk.LabelFrame(root, text="Gráfico Gantt")
+frame_gantt.pack(fill='both', expand=True, padx=10, pady=10)
 
 
 # Inicia no modo de importação
