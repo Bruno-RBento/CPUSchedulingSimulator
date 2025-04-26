@@ -1,230 +1,285 @@
 import time
 import random
+import copy
 
-def FCFS3_lista_objetos(lista_processos):
+
+
+def FCFS4(lista_processos, tempo_max=100, processos_max=100):
     tempo_atual = 0
     ordem_execucao = []
+    processos_escalonados = 0
 
-    for proc in lista_processos:
-        inicio = tempo_atual
-        fim = inicio + proc.tempo_execucao
-        proc.tempo_inicio = inicio
-        proc.tempo_conclusao = fim
-        ordem_execucao.append({
-            "id": proc.pid,
-            "start": inicio,
-            "end": fim
-        })
-        tempo_atual = fim
+    lista = lista_processos.copy()  # <- COPIA antes de mexer
+
+    lista.sort(key=lambda p: p.tempo_chegada)  # Ordena pela chegada
+
+    for proc in lista:
+        if processos_escalonados >= processos_max:
+            break
+
+        if proc.tempo_chegada > tempo_atual:
+            tempo_atual = proc.tempo_chegada
+
+        if tempo_atual + proc.tempo_execucao <= tempo_max:
+            inicio = tempo_atual
+            fim = inicio + proc.tempo_execucao
+            proc.tempo_inicio = inicio
+            proc.tempo_conclusao = fim
+
+            ordem_execucao.append({
+                "id": proc.pid,
+                "start": inicio,
+                "end": fim
+            })
+
+            tempo_atual = fim
+            processos_escalonados += 1
+
+        elif tempo_atual < tempo_max:
+            inicio = tempo_atual
+            fim = tempo_max
+            tempo_execucao_parcial = fim - inicio
+
+            proc.tempo_inicio = inicio
+            proc.tempo_conclusao = fim
+
+            ordem_execucao.append({
+                "id": proc.pid,
+                "start": inicio,
+                "end": fim
+            })
+
+            tempo_atual = fim
+            processos_escalonados += 1
+            break
 
     return ordem_execucao
 
 
-def FCFS2(lista_processos):
-    """
-    Executa o algoritmo First-Come, First-Served e retorna
-    uma lista de dicionários com a ordem de execução para o gráfico Gantt.
-    
-    Cada item da lista de entrada deve ser uma tupla: (id, burst_time)
-    """
+
+
+def ShortestJob3(lista_processos, tempo_max=10, processos_max=100):
     tempo_atual = 0
     ordem_execucao = []
+    processos_escalonados = 0
 
-    for pid, burst in lista_processos:
-        inicio = tempo_atual
-        fim = inicio + burst
-        ordem_execucao.append({
-            "id": pid,
-            "start": inicio,
-            "end": fim
-        })
-        tempo_atual = fim
+    # FAZER CÓPIA para não modificar a lista original:
+    lista = lista_processos.copy()
 
-    return ordem_execucao
+    lista.sort(key=lambda p: p.tempo_chegada)  # Primeiro ordena por chegada
 
+    while lista and tempo_atual < tempo_max and processos_escalonados < processos_max:
+        disponiveis = [p for p in lista if p.tempo_chegada <= tempo_atual]
 
-def FCFS(lista_processos):
-    duration = 0
-    i = -1
-    while len(lista_processos) > 0:
-        i = i + 1
-        tempo = 2
-        while tempo > 1:
-            if len(lista_processos) > i:
-                id,tempo = lista_processos[i]
-                duration += 1
-                print(lista_processos[i])
-                lista_processos[i] = (id, tempo - 1)
-                time.sleep(1)
+        if not disponiveis:
+            tempo_atual = lista[0].tempo_chegada
+            continue
 
-        id,tempo = lista_processos[i]
-        if tempo == 0:
-            print("Processo com o id "+str(id)+" concluido com sucesso")
+        disponiveis.sort(key=lambda p: p.tempo_execucao)
+        proc = disponiveis[0]
 
-# O i é o indice do array e o id = i + 1
-def roundRobin(lista_processos):
-    intervalo_exe = 5
-    i = 0
-    nao_incrementar = 0
-    while len(lista_processos) > 0:
-        if len(lista_processos) <= i:
-            i = 0
-            nao_incrementar = 0
-        id,tempo = lista_processos[i]
-        if tempo > intervalo_exe:
-            lista_processos[i] = (id,tempo - intervalo_exe)
-            i = i + 1
+        if tempo_atual + proc.tempo_execucao <= tempo_max:
+            inicio = tempo_atual
+            fim = inicio + proc.tempo_execucao
+            proc.tempo_inicio = inicio
+            proc.tempo_conclusao = fim
+
+            ordem_execucao.append({
+                "id": proc.pid,
+                "start": inicio,
+                "end": fim
+            })
+
+            tempo_atual = fim
+            processos_escalonados += 1
+            lista.remove(proc)
+
         else:
-            print("Processo com o id "+str(id)+" concluido com sucesso!")
-            lista_processos.pop(i)
-        time.sleep(1)
-        
-def ordenarTempoOrdemCrescente(lista):
-    var_elemento = lista[0]
-    for i in range(len(lista)):
-        for j in range(len(lista) - 1):
-            id1,tempo1 = lista[j]
-            id2,tempo2 = lista[j + 1]
-            if tempo1 > tempo2:
-                var_elemento = lista[j]
-                lista[j] = lista[j + 1]
-                lista[j + 1] = var_elemento
+            inicio = tempo_atual
+            fim = tempo_max
+
+            proc.tempo_inicio = inicio
+            proc.tempo_conclusao = fim
+
+            ordem_execucao.append({
+                "id": proc.pid,
+                "start": inicio,
+                "end": fim
+            })
+
+            tempo_atual = fim
+            processos_escalonados += 1
+            break
+
+    return ordem_execucao
+
+
+
+def RoundRobin2(lista_processos, quantum=5, tempo_max=10, processos_max=100):
+    tempo_atual = 0
+    ordem_execucao = []
+    processos_escalonados = 0
+    fila = []
+
+    lista = lista_processos.copy()
+    lista.sort(key=lambda p: p.tempo_chegada)
+
+    while (lista or fila) and tempo_atual < tempo_max and processos_escalonados < processos_max:
+        # Primeiro: adiciona processos que chegaram
+        while lista and lista[0].tempo_chegada <= tempo_atual:
+            fila.append(lista.pop(0))
+
+        if not fila:
+            if lista:
+                tempo_atual = lista[0].tempo_chegada
+            continue
+
+        proc = fila.pop(0)
+
+        # *** ANTES DE EXECUTAR, RE-CHECAR processos que chegaram ***
+        while lista and lista[0].tempo_chegada <= tempo_atual:
+            fila.append(lista.pop(0))
+
+        if tempo_atual < tempo_max:
+            inicio = tempo_atual
+            tempo_executado = min(quantum, proc.tempo_execucao, tempo_max - tempo_atual)
+            fim = inicio + tempo_executado
+
+            if not hasattr(proc, 'tempo_inicio') or proc.tempo_inicio is None:
+                proc.tempo_inicio = inicio
+
+            proc.tempo_execucao -= tempo_executado
+            proc.tempo_conclusao = fim
+
+            ordem_execucao.append({
+                "id": proc.pid,
+                "start": inicio,
+                "end": fim
+            })
+
+            tempo_atual = fim
+
+            # *** Depois de avançar o tempo, RE-CHECAR de novo! ***
+            while lista and lista[0].tempo_chegada <= tempo_atual:
+                fila.append(lista.pop(0))
+
+            if proc.tempo_execucao > 0:
+                fila.append(proc)  # volta para o fim
+            else:
+                processos_escalonados += 1
+
+    return ordem_execucao
+
+
+
+
+def Priority_Preemptive(lista_processos, tempo_max=10, processos_max=100):
+    tempo_atual = 0
+    ordem_execucao = []
+    processos_escalonados = 0
+    lista = copy.deepcopy(lista_processos)  # ← copia completa, objetos independentes
+
+    lista.sort(key=lambda p: p.tempo_chegada)
+    fila = []
+
+    processo_atual = None
+
+    while (lista or fila or processo_atual) and tempo_atual < tempo_max and processos_escalonados < processos_max:
+        # Adiciona processos que chegaram até agora
+        while lista and lista[0].tempo_chegada <= tempo_atual:
+            fila.append(lista.pop(0))
+
+        if processo_atual:
+            fila.append(processo_atual)  # Se o processo atual ainda não acabou, volta pra fila
+
+        if fila:
+            fila.sort(key=lambda p: (p.prioridade, p.tempo_chegada))
+            processo_atual = fila.pop(0)
+        else:
+            if lista:
+                tempo_atual = lista[0].tempo_chegada
+            processo_atual = None
+            continue
+
+        # Executa 1 unidade de tempo
+        inicio = tempo_atual
+        fim = inicio + 1
+
+        if not hasattr(processo_atual, 'tempo_inicio') or processo_atual.tempo_inicio is None:
+            processo_atual.tempo_inicio = inicio
+
+        processo_atual.tempo_execucao -= 1
+        processo_atual.tempo_conclusao = fim
+
+        ordem_execucao.append({
+            "id": processo_atual.pid,
+            "start": inicio,
+            "end": fim
+        })
+
+        tempo_atual = fim
+
+        if processo_atual.tempo_execucao <= 0:
+            processos_escalonados += 1
+            processo_atual = None
+
+    return ordem_execucao
+
+
+
+
+def Priority_Non_Preemptive(lista_processos, tempo_max=10, processos_max=100):
+    tempo_atual = 0
+    ordem_execucao = []
+    processos_escalonados = 0
+    lista = copy.deepcopy(lista_processos)
+    lista.sort(key=lambda p: p.tempo_chegada)
+    fila = []
+    processo_atual = None
     
-    return lista
-
-def imprimir_lista(lista):
-    new_lista = []
-    for i in range(len(lista)):
-        new_lista.append(lista[i])
-    print("Lista Atual: "+str(new_lista))
-
-
-def shortestJob(lista_processos):
-    contador = 1
-    id = 0
-    tempo = 0
-    id2 = 0
-    tempo2 = 0
-    # Executa até não haver mais "processos" a executar
-    while len(lista_processos) > 0:
-        ordenarTempoOrdemCrescente(lista_processos)
-        imprimir_lista(lista_processos)
-        id,tempo = lista_processos[0]
-        lista_processos[0] = (id,tempo - 1)
-        # Gerar mais um processo em 15% das vezes, ou seja, temos 15% de probabilidades de termos um processo adicionado
-        num = random.randint(1, 100)
-        if num <= 15:
-            while contador >= 1:
-                if contador >= 1:
-                    var_id = random.randint(1,100)
-                    var_tempo = random.randint(1,10)
-                    contador = 0
-                for j in range(len(lista_processos)):
-                    id2,tempo2 = lista_processos[j] 
-                    if id2 == var_id:
-                        contador += 1
-            lista_processos.append((var_id,var_tempo))
-            print("Processo com o id "+str(var_id)+" adicionado com sucesso")    
-        id3,tempo3 = lista_processos[0]
-        if tempo3 < 0:
-            print("Processo com o id "+str(id3)+" concluido com sucesso!")
-            lista_processos.pop(0)
+    while tempo_atual < tempo_max and (lista or fila or processo_atual) and processos_escalonados < processos_max:
+        # Adiciona processos que chegaram até agora
+        while lista and lista[0].tempo_chegada <= tempo_atual:
+            fila.append(lista.pop(0))
+            
+        if processo_atual is None:
+            if fila:
+                # Pega o processo com maior prioridade (menor valor = maior prioridade)
+                fila.sort(key=lambda p: (p.prioridade, p.tempo_chegada))
+                processo_atual = fila.pop(0)
+            else:
+                # Se não há processos prontos, avança o tempo para a próxima chegada
+                if lista:
+                    tempo_atual = lista[0].tempo_chegada
+                continue
         
-        time.sleep(1)
-
-
-def ordenarPorPrioridade(lista):
-    var_elemento = lista[0]
-    id1 = 0
-    tempo1 = 0
-    id2 = 0
-    tempo2 = 0
-    prioridade1 = 0
-    prioridade2 = 0
-    for i in range(len(lista)):
-        for j in range(len(lista) - 1):
-            id1,tempo1,prioridade1 = lista[j]
-            id2,tempo2,prioridade2 = lista[j + 1]
-            if prioridade1 > prioridade2:
-                var_elemento = lista[j]
-                lista[j] = lista[j + 1]
-                lista[j + 1] = var_elemento
+        # Executa o processo até terminar
+        inicio = tempo_atual
+        fim = inicio + processo_atual.tempo_execucao
+        
+        if fim > tempo_max:
+            fim = tempo_max
+            processo_atual.tempo_execucao -= (fim - inicio)
+        else:
+            processo_atual.tempo_execucao = 0
+        
+        # Registra o tempo de início se for a primeira execução deste processo
+        if not hasattr(processo_atual, 'tempo_inicio') or processo_atual.tempo_inicio is None:
+            processo_atual.tempo_inicio = inicio
+            
+        processo_atual.tempo_conclusao = fim
+        
+        ordem_execucao.append({
+            "id": processo_atual.pid,
+            "start": inicio,
+            "end": fim
+        })
+        
+        tempo_atual = fim
+        
+        # Se o processo terminou completamente
+        if processo_atual.tempo_execucao <= 0:
+            processos_escalonados += 1
+            processo_atual = None
     
-    return lista
-
-# Preemptivo que para um processo se chegar um com nível de prioridade superior
-def Priority_Scheduling_Preemptivo(lista_processos):
-    contador = 1
-    id = 0
-    tempo = 0
-    id2 = 0
-    tempo2 = 0
-    prioridade = 0
-    prioridade2 = 0
-    i = -1
-    # Executa até não haver mais "processos" a executar
-    while len(lista_processos) > 0:
-        i = i + 1
-        ordenarPorPrioridade(lista_processos)
-        imprimir_lista(lista_processos)
-        id,tempo,prioridade = lista_processos[0]
-        lista_processos[0] = (id,tempo - 1,prioridade)
-        num = random.randint(1, 100)
-        if num <= 15:
-            id2,tempo2,prioridade2 = lista_processos[len(lista_processos) - 1]
-            var_id = id2 + 1
-            lista_processos.append((var_id,random.randint(1,5),random.randint(1,5)))
-            print("Processo com o ID "+str(var_id)+" adicionado com sucesso")
-
-        if tempo <= 0:
-            print("Processo com o ID "+str(id)+" eliminado com sucesso")
-            lista_processos.pop(0)
-        time.sleep(1)
-
-def maiorID(lista):
-    maior = 0
-    for i in range(len(lista) - 1):
-        id,tempo,prioridade = lista[i]
-        if id > maior:
-            maior = id
-    return maior
-        
-
-
-def Priority_Scheduling_Non_Preemptivo(lista_processos):
-    contador = 1
-    id = 0
-    tempo = 0
-    guardarElementoAtual = lista_processos[0]
-    id2 = 0
-    tempo2 = 0
-    prioridade = 0
-    var_maiorID = 0
-    prioridade2 = 0
-    i = -1
-    # Executa até não haver mais "processos" a executar
-    while len(lista_processos) > 0:
-        i = i + 1
-        var_maiorID = maiorID(lista_processos)
-        guardarElementoAtual = lista_processos[0]
-        lista_processos.pop(0)
-        ordenarPorPrioridade(lista_processos)
-        # O insert está a inserir no inicio da lista(posição 0)
-        lista_processos.insert(0,guardarElementoAtual)
-        imprimir_lista(lista_processos)
-        id,tempo,prioridade = lista_processos[0]
-        tempo = tempo - 1
-        lista_processos[0] = (id,tempo,prioridade)
-        num = random.randint(1, 100)
-        if num <= 15:
-            var_tempo = random.randint(1,10)
-            var_prioridade = random.randint(1,5)
-            contador = 0
-            var_id = var_maiorID + 1
-            lista_processos.append((var_id,var_tempo,var_prioridade))
-            print("Processo com o id "+str(var_id)+" adicionado com sucesso")   
-
-        if tempo <= 0:
-            print("Processo com o ID "+str(id)+" eliminado com sucesso")
-            lista_processos.pop(0)
-        time.sleep(1)
+    return ordem_execucao

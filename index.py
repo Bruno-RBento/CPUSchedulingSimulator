@@ -11,14 +11,13 @@ from gannt import gerar_grafico_png
 
 from importcsv  import importar_csv
 from algoritmos import (
-    FCFS,
-    FCFS2,
-    FCFS3_lista_objetos,
-    roundRobin,
-    shortestJob,
-    Priority_Scheduling_Preemptivo,
-    Priority_Scheduling_Non_Preemptivo
+    FCFS4,
+    ShortestJob3,
+    RoundRobin2,
+    Priority_Preemptive,
+    Priority_Non_Preemptive
 )
+
 
 
 root = tk.Tk()
@@ -133,20 +132,28 @@ def iniciar_simulacao():
 
     if tipo == "aperiodico":
         if algoritmo.startswith("First-Come"):
-            gantt_data = FCFS3_lista_objetos(processos)
+            #for
+            gantt_data = FCFS4(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
             mostrar_gantt(gantt_data)
+            
 
         elif algoritmo.startswith("Shortest Job"):
-            return
+            gantt_data = ShortestJob3(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            mostrar_gantt(gantt_data)
         # Exemplo para Round Robin:
-        elif algoritmo.startswith("Round Robin"):
-                return
+        elif algoritmo.startswith("Round Robin (RR)"):
+                gantt_data = RoundRobin2(processos, quantum=int(quantum_var.get()), tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+                mostrar_gantt(gantt_data)
             
         elif algoritmo.startswith("Priority Preemptive"):
-            return
+            gantt_data = Priority_Preemptive(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            mostrar_gantt(gantt_data)
+            
         
         elif algoritmo.startswith("Priority Non-Preemptive"):
-            return
+            gantt_data = Priority_Non_Preemptive(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            mostrar_gantt(gantt_data)
+            
 
     elif tipo == "periodico":
         if algoritmo.startswith("RT Rate Monotonic"):
