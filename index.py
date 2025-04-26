@@ -10,15 +10,18 @@ from PIL import Image, ImageTk
 from gannt import gerar_grafico_png
 
 from importcsv  import importar_csv
+
 from algoritmos import (
     FCFS4,
     ShortestJob3,
     RoundRobin2,
     Priority_Preemptive,
-    Priority_Non_Preemptive
+    Priority_Non_Preemptive,
 )
 
-
+from processo import (
+    gerar_processos_R
+)
 
 root = tk.Tk()
 root.title("CPU Scheduling Simulator")
@@ -62,8 +65,15 @@ def alternar_modo(modo):
     else:
         gerar_frame.pack(pady=5, fill='x', padx=10)
 
-def gerar_processos(tipo):
-    messagebox.showinfo("Gerar", f"Gerar processos {tipo} com distribuições selecionadas.")
+def gerar_processos():
+    global processos
+    num_processos = int(process_count_var.get())
+    chegada = arrival_dist_var.get()
+    burst = burst_dist_var.get()
+    
+    processos = gerar_processos_R(num_processos, chegada, burst)
+    update_process_queue()
+
 
 
 def converter_processos_para_tabela(processos):
@@ -157,7 +167,8 @@ def iniciar_simulacao():
 
     elif tipo == "periodico":
         if algoritmo.startswith("RT Rate Monotonic"):
-            return
+            gantt_data = Rate_monotonic(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            mostrar_gantt(gantt_data)
         elif algoritmo.startswith("EDF (Earliest Deadline First)"):
             return
         elif algoritmo.startswith("Multilevel Queue Scheduling"):
@@ -214,14 +225,16 @@ import_button.pack()
 # Frame de geração
 gerar_frame = ttk.LabelFrame(left_frame, text="Parâmetros de Geração Aleatória")
 
-ttk.Label(gerar_frame, text="Distribuição de Chegada").grid(row=0, column=0, sticky='w')
-ttk.Combobox(gerar_frame, textvariable=arrival_dist_var, values=["Poisson", "Exponential"], state='readonly').grid(row=0, column=1, padx=5)
+ttk.Label(gerar_frame, text="Numero de Processos").grid(row=0, column=0, sticky='w')
+ttk.Entry(gerar_frame, textvariable=process_count_var, width=20).grid(row=0, column=1, padx=5)
 
-ttk.Label(gerar_frame, text="Distribuição de Burst").grid(row=1, column=0, sticky='w')
-ttk.Combobox(gerar_frame, textvariable=burst_dist_var, values=["Normal", "Exponential"], state='readonly').grid(row=1, column=1, padx=5)
+ttk.Label(gerar_frame, text="Distribuição de Chegada").grid(row=1, column=0, sticky='w')
+ttk.Combobox(gerar_frame, textvariable=arrival_dist_var, values=["Poisson", "Exponential"], state='readonly').grid(row=1, column=1, padx=5)
 
-ttk.Button(gerar_frame, text="Gerar Processos Aleatórios", command=lambda: gerar_processos(tipo_processo_var.get())).grid(row=2, column=0, columnspan=6, pady=10)
+ttk.Label(gerar_frame, text="Distribuição de Burst").grid(row=2, column=0, sticky='w')
+ttk.Combobox(gerar_frame, textvariable=burst_dist_var, values=["Normal", "Exponential"], state='readonly').grid(row=2, column=1, padx=5)
 
+ttk.Button(gerar_frame, text="Gerar Processos Aleatórios", command=gerar_processos).grid(row=3, column=0, columnspan=6, pady=10)
 # Botão para iniciar simulação (fora do main_frame para ficar sempre no fim)
 start_button = ttk.Button(root, text="Iniciar Simulação", command=lambda: iniciar_simulacao())
 start_button.pack(pady=20)

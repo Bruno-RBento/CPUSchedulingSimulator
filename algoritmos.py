@@ -9,7 +9,7 @@ def FCFS4(lista_processos, tempo_max=100, processos_max=100):
     ordem_execucao = []
     processos_escalonados = 0
 
-    lista = lista_processos.copy()  # <- COPIA antes de mexer
+    lista = copy.deepcopy(lista_processos)  # <- COPIA antes de mexer
 
     lista.sort(key=lambda p: p.tempo_chegada)  # Ordena pela chegada
 
@@ -64,7 +64,7 @@ def ShortestJob3(lista_processos, tempo_max=10, processos_max=100):
     processos_escalonados = 0
 
     # FAZER CÓPIA para não modificar a lista original:
-    lista = lista_processos.copy()
+    lista = copy.deepcopy(lista_processos)   # ← copia completa, objetos independentes
 
     lista.sort(key=lambda p: p.tempo_chegada)  # Primeiro ordena por chegada
 
@@ -121,7 +121,7 @@ def RoundRobin2(lista_processos, quantum=5, tempo_max=10, processos_max=100):
     processos_escalonados = 0
     fila = []
 
-    lista = lista_processos.copy()
+    lista = copy.deepcopy(lista_processos)  # ← copia completa, objetos independentes
     lista.sort(key=lambda p: p.tempo_chegada)
 
     while (lista or fila) and tempo_atual < tempo_max and processos_escalonados < processos_max:
@@ -283,3 +283,4 @@ def Priority_Non_Preemptive(lista_processos, tempo_max=10, processos_max=100):
             processo_atual = None
     
     return ordem_execucao
+
