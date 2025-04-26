@@ -43,11 +43,23 @@ def gerar_grafico_png(processos):
             title='',
             showticklabels=False
         ),
-        height=300,
-        width=800,
-        legend_title_text='Processo'
-    )
-
+        legend=dict(
+        title='Processo',
+        orientation='v',
+        yanchor='top',
+        y=1.0,
+        xanchor='left',
+        x=1.02,
+        traceorder='normal',
+        itemwidth=70,         # largura dos blocos
+        valign="top",
+        borderwidth=0,
+        bgcolor='rgba(0,0,0,0)',
+        font=dict(size=10),
+    ),
+    height=400,
+    width=900,
+)
     # Guardar imagem
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
     pio.write_image(fig, temp_file.name, format='png')
