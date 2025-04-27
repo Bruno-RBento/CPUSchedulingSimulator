@@ -8,13 +8,14 @@ from gannt import gerar_grafico_png
 from importcsv  import importar_csv
 
 from algoritmos import (
-    FCFS4,
-    ShortestJob3,
-    RoundRobin2,
+    FCFS,
+    ShortestJob,
+    RoundRobin,
     Priority_Preemptive,
     Priority_Non_Preemptive,
     Rate_monotonic,
-    Edf
+    Edf,
+    Multilevel_Queue_Scheduling
 )
 
 from processo import (
@@ -225,18 +226,18 @@ def iniciar_simulacao():
 
     if tipo == "aperiodico":
         if algoritmo.startswith("First-Come"):
-            gantt_data = FCFS4(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            gantt_data = FCFS(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
             calcular_e_mostrar_estatisticas(processos, gantt_data)
             mostrar_gantt(gantt_data)
 
 
         elif algoritmo.startswith("Shortest Job"):
-            gantt_data = ShortestJob3(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            gantt_data = ShortestJob(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
             calcular_e_mostrar_estatisticas(processos, gantt_data)
             mostrar_gantt(gantt_data)
             
         elif algoritmo.startswith("Round Robin (RR)"):
-                gantt_data = RoundRobin2(processos, quantum=int(quantum_var.get()), tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+                gantt_data = RoundRobin(processos, quantum=int(quantum_var.get()), tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
                 calcular_e_mostrar_estatisticas(processos, gantt_data)
                 mostrar_gantt(gantt_data)
             
@@ -255,14 +256,19 @@ def iniciar_simulacao():
     elif tipo == "periodico":
         if algoritmo.startswith("RT Rate Monotonic"):
             gantt_data = Rate_monotonic(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            calcular_e_mostrar_estatisticas(processos, gantt_data)
             mostrar_gantt(gantt_data)
 
         elif algoritmo.startswith("EDF (Earliest Deadline First)"):
             gantt_data = Edf(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            calcular_e_mostrar_estatisticas(processos, gantt_data)
             mostrar_gantt(gantt_data)
 
         elif algoritmo.startswith("Multilevel Queue Scheduling"):
-            return
+            gantt_data = Multilevel_Queue_Scheduling(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            calcular_e_mostrar_estatisticas(processos, gantt_data)
+            mostrar_gantt(gantt_data)
+
 
 
     elif tipo == "periodico":

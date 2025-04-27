@@ -4,7 +4,7 @@ import copy
 
 
 
-def FCFS4(lista_processos, tempo_max=100, processos_max=100):
+def FCFS(lista_processos, tempo_max=100, processos_max=100):
     tempo_atual = 0
     ordem_execucao = []
     processos_escalonados = 0
@@ -58,7 +58,7 @@ def FCFS4(lista_processos, tempo_max=100, processos_max=100):
 
 
 
-def ShortestJob3(lista_processos, tempo_max=10, processos_max=100):
+def ShortestJob(lista_processos, tempo_max=10, processos_max=100):
     tempo_atual = 0
     ordem_execucao = []
     processos_escalonados = 0
@@ -115,7 +115,7 @@ def ShortestJob3(lista_processos, tempo_max=10, processos_max=100):
 
 
 
-def RoundRobin2(lista_processos, quantum=5, tempo_max=10, processos_max=100):
+def RoundRobin(lista_processos, quantum=5, tempo_max=10, processos_max=100):
     tempo_atual = 0
     ordem_execucao = []
     processos_escalonados = 0
@@ -376,6 +376,60 @@ def Edf(lista_processos, tempo_max=30, processos_max=100):
         
         if prontos:
             p = prontos[0]
+            inicio = tempo
+            tempo_exec = min(1, p.tempo_restante, tempo_max - tempo)
+            fim = inicio + tempo_exec
+            p.tempo_restante -= tempo_exec
+            
+            ordem_execucao.append({
+                "id": p.pid,
+                "start": inicio,
+                "end": fim
+            })
+            
+            tempo = fim
+        else:
+            tempo += 1
+    
+    return ordem_execucao
+
+def Multilevel_Queue_Scheduling(lista_processos, tempo_max=30, processos_max=100):
+    # Filtrar apenas processos de tempo real (com período definido)
+    lista_filtrada = [p for p in lista_processos if p.tempo_chegada <= tempo_max and p.periodo is not None]
+    
+    # Limitar o número máximo de processos
+    lista_filtrada = lista_filtrada[:processos_max]
+    
+    # Deepcopy seguro
+    lista = copy.deepcopy(lista_filtrada)
+    
+    tempo = 0
+    ordem_execucao = []
+    
+    # Inicializar estados
+    for p in lista:
+        if not hasattr(p, 'tempo_restante') or p.tempo_restante is None:
+            p.tempo_restante = p.tempo_execucao
+        if p.periodo is not None:
+            p.proxima_chegada = p.tempo_chegada + p.periodo
+            p.deadline = p.proxima_chegada
+        else:
+            p.proxima_chegada = float('inf')
+            p.deadline = float('inf')
+    
+    while tempo < tempo_max:
+        for p in lista:
+            if p.periodo is not None and p.proxima_chegada <= tempo and p.tempo_restante <= 0:
+                p.tempo_restante = p.tempo_execucao
+                p.proxima_chegada += p.periodo
+                p.deadline = p.proxima_chegada
+        
+        prontos = [p for p in lista if p.tempo_chegada <= tempo and p.tempo_restante > 0]
+        
+        if prontos:
+            prontos.sort(key=lambda p: (p.deadline, p.tempo_chegada))
+            p = prontos[0]
+            
             inicio = tempo
             tempo_exec = min(1, p.tempo_restante, tempo_max - tempo)
             fim = inicio + tempo_exec
