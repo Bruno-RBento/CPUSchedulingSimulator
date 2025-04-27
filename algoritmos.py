@@ -1,5 +1,3 @@
-import time
-import random
 import copy
 
 
@@ -125,7 +123,7 @@ def RoundRobin(lista_processos, quantum=5, tempo_max=10, processos_max=100):
     lista.sort(key=lambda p: p.tempo_chegada)
 
     while (lista or fila) and tempo_atual < tempo_max and processos_escalonados < processos_max:
-        # Primeiro: adiciona processos que chegaram
+
         while lista and lista[0].tempo_chegada <= tempo_atual:
             fila.append(lista.pop(0))
 
@@ -136,7 +134,6 @@ def RoundRobin(lista_processos, quantum=5, tempo_max=10, processos_max=100):
 
         proc = fila.pop(0)
 
-        # *** ANTES DE EXECUTAR, RE-CHECAR processos que chegaram ***
         while lista and lista[0].tempo_chegada <= tempo_atual:
             fila.append(lista.pop(0))
 
@@ -394,19 +391,16 @@ def Edf(lista_processos, tempo_max=30, processos_max=100):
     return ordem_execucao
 
 def Multilevel_Queue_Scheduling(lista_processos, tempo_max=30, processos_max=100):
-    # Filtrar apenas processos de tempo real (com período definido)
     lista_filtrada = [p for p in lista_processos if p.tempo_chegada <= tempo_max and p.periodo is not None]
     
-    # Limitar o número máximo de processos
+
     lista_filtrada = lista_filtrada[:processos_max]
-    
-    # Deepcopy seguro
+
     lista = copy.deepcopy(lista_filtrada)
     
     tempo = 0
     ordem_execucao = []
     
-    # Inicializar estados
     for p in lista:
         if not hasattr(p, 'tempo_restante') or p.tempo_restante is None:
             p.tempo_restante = p.tempo_execucao

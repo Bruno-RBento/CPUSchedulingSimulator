@@ -276,7 +276,7 @@ def iniciar_simulacao():
 
 
 # Scheduling Algorithm
-ttk.Label(left_frame, text="Scheduling Algorithm").pack(pady=5)
+ttk.Label(left_frame, text="Algoritmo de Escalonamento").pack(pady=5)
 algorithm_menu = ttk.Combobox(left_frame, textvariable=algorithm_var, state="readonly")
 algorithm_menu['values'] = ["First-Come, First-Served (FCFS)", "Shortest Job (SJ)", "Priority Preemptive","Priority Non-Preemptive", "Round Robin (RR)", "RT Rate Monotonic", "EDF (Earliest Deadline First)", "Multilevel Queue Scheduling"]
 algorithm_menu.pack()
@@ -297,7 +297,7 @@ process_count_entry.grid(row=1, column=1, padx=5)
 # Quantum
 quantum_frame = ttk.Frame(left_frame)
 quantum_frame.pack(pady=10)
-ttk.Label(quantum_frame, text="Time Quantum (for Round Robin scheduling)").grid(row=0, column=0, sticky="w")
+ttk.Label(quantum_frame, text="Time Quantum (for Round Robin)").grid(row=0, column=0, sticky="w")
 quantum_entry = ttk.Entry(quantum_frame, textvariable=quantum_var, width=20, state='disabled')
 quantum_entry.grid(row=1, column=0, pady=5)
 
