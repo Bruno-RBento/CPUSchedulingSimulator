@@ -232,8 +232,15 @@ def Priority_Non_Preemptive(lista_processos, tempo_max=10, processos_max=100):
     tempo_atual = 0
     ordem_execucao = []
     processos_escalonados = 0
-    lista = copy.deepcopy(lista_processos)
+    
+    # Faz uma cópia segura da lista
+    lista_filtrada = [p for p in lista_processos if p.tempo_chegada <= tempo_max]
+    lista_filtrada = lista_filtrada[:processos_max]  # Limitar o número de processos
+    lista = copy.deepcopy(lista_filtrada)
+    
+    # Ordena inicialmente por tempo de chegada
     lista.sort(key=lambda p: p.tempo_chegada)
+    
     fila = []
     processo_atual = None
     
@@ -241,7 +248,7 @@ def Priority_Non_Preemptive(lista_processos, tempo_max=10, processos_max=100):
         # Adiciona processos que chegaram até agora
         while lista and lista[0].tempo_chegada <= tempo_atual:
             fila.append(lista.pop(0))
-            
+        
         if processo_atual is None:
             if fila:
                 # Pega o processo com maior prioridade (menor valor = maior prioridade)
@@ -266,7 +273,7 @@ def Priority_Non_Preemptive(lista_processos, tempo_max=10, processos_max=100):
         # Registra o tempo de início se for a primeira execução deste processo
         if not hasattr(processo_atual, 'tempo_inicio') or processo_atual.tempo_inicio is None:
             processo_atual.tempo_inicio = inicio
-            
+        
         processo_atual.tempo_conclusao = fim
         
         ordem_execucao.append({
