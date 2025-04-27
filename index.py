@@ -272,7 +272,7 @@ def iniciar_simulacao():
 # Scheduling Algorithm
 ttk.Label(left_frame, text="Scheduling Algorithm").pack(pady=5)
 algorithm_menu = ttk.Combobox(left_frame, textvariable=algorithm_var, state="readonly")
-algorithm_menu['values'] = ["First-Come, First-Served (FCFS)", "Shortest Job (SJ)", "Priority Preemptive","Priority  Non-Preemptive", "Round Robin (RR)", "RT Rate Monotonic", "EDF (Earliest Deadline First)", "Multilevel Queue Scheduling"]
+algorithm_menu['values'] = ["First-Come, First-Served (FCFS)", "Shortest Job (SJ)", "Priority Preemptive","Priority Non-Preemptive", "Round Robin (RR)", "RT Rate Monotonic", "EDF (Earliest Deadline First)", "Multilevel Queue Scheduling"]
 algorithm_menu.pack()
 algorithm_menu.bind("<<ComboboxSelected>>", on_algorithm_selected)
 
