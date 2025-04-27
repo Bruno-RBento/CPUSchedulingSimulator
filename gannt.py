@@ -1,6 +1,3 @@
-# grafico_escalonamento.py
-
-from PIL import Image, ImageTk
 import plotly.graph_objects as go
 import plotly.colors as pc
 import plotly.io as pio
@@ -19,7 +16,10 @@ def gerar_grafico_png(processos):
 
     fig = go.Figure()
 
+    adicionados = set()
+
     for p in processos:
+        show_legend = p['Processo'] not in adicionados
         fig.add_trace(go.Bar(
             x=[p['Duracao']],
             y=["CPU"],
@@ -27,8 +27,10 @@ def gerar_grafico_png(processos):
             name=p['Processo'],
             marker_color=cores_por_processo[p['Processo']],
             orientation='h',
-            hovertemplate=f"{p['Processo']}: {p['Inicio']}s → {p['Inicio'] + p['Duracao']}s"
+            hovertemplate=f"{p['Processo']}: {p['Inicio']}s → {p['Inicio'] + p['Duracao']}s",
+            showlegend=show_legend
         ))
+        adicionados.add(p['Processo'])
 
     fig.update_layout(
         barmode='stack',
@@ -44,23 +46,23 @@ def gerar_grafico_png(processos):
             showticklabels=False
         ),
         legend=dict(
-        title='Processo',
-        orientation='v',
-        yanchor='top',
-        y=1.0,
-        xanchor='left',
-        x=1.02,
-        traceorder='normal',
-        itemwidth=70,         # largura dos blocos
-        valign="top",
-        borderwidth=0,
-        bgcolor='rgba(0,0,0,0)',
-        font=dict(size=10),
-    ),
-    height=400,
-    width=900,
-)
-    # Guardar imagem
+            title='Processo',
+            orientation='v',
+            yanchor='top',
+            y=1.0,
+            xanchor='left',
+            x=1.02,
+            traceorder='normal',
+            itemwidth=70,
+            valign="top",
+            borderwidth=0,
+            bgcolor='rgba(0,0,0,0)',
+            font=dict(size=10),
+        ),
+        height=400,
+        width=900,
+    )
+
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
     pio.write_image(fig, temp_file.name, format='png')
     return temp_file.name

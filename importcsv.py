@@ -1,6 +1,6 @@
 from tkinter import filedialog, messagebox
 import csv
-from processo import Processo  # importa tua classe Processo
+from processo import Processo
 
 def importar_csv(processos, tipo_processo_var, update_process_queue):
     tipo = tipo_processo_var.get()

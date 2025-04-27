@@ -1,5 +1,3 @@
-import time
-import random
 import copy
 
 
@@ -9,9 +7,9 @@ def FCFS4(lista_processos, tempo_max=100, processos_max=100):
     ordem_execucao = []
     processos_escalonados = 0
 
-    lista = copy.deepcopy(lista_processos)  # <- COPIA antes de mexer
+    lista = copy.deepcopy(lista_processos)
 
-    lista.sort(key=lambda p: p.tempo_chegada)  # Ordena pela chegada
+    lista.sort(key=lambda p: p.tempo_chegada)
 
     for proc in lista:
         if processos_escalonados >= processos_max:
@@ -63,10 +61,9 @@ def ShortestJob3(lista_processos, tempo_max=10, processos_max=100):
     ordem_execucao = []
     processos_escalonados = 0
 
-    # FAZER CÓPIA para não modificar a lista original:
-    lista = copy.deepcopy(lista_processos)   # ← copia completa, objetos independentes
+    lista = copy.deepcopy(lista_processos) 
 
-    lista.sort(key=lambda p: p.tempo_chegada)  # Primeiro ordena por chegada
+    lista.sort(key=lambda p: p.tempo_chegada)
 
     while lista and tempo_atual < tempo_max and processos_escalonados < processos_max:
         disponiveis = [p for p in lista if p.tempo_chegada <= tempo_atual]
@@ -121,11 +118,11 @@ def RoundRobin2(lista_processos, quantum=5, tempo_max=10, processos_max=100):
     processos_escalonados = 0
     fila = []
 
-    lista = copy.deepcopy(lista_processos)  # ← copia completa, objetos independentes
+    lista = copy.deepcopy(lista_processos)
     lista.sort(key=lambda p: p.tempo_chegada)
 
     while (lista or fila) and tempo_atual < tempo_max and processos_escalonados < processos_max:
-        # Primeiro: adiciona processos que chegaram
+
         while lista and lista[0].tempo_chegada <= tempo_atual:
             fila.append(lista.pop(0))
 
@@ -136,7 +133,7 @@ def RoundRobin2(lista_processos, quantum=5, tempo_max=10, processos_max=100):
 
         proc = fila.pop(0)
 
-        # *** ANTES DE EXECUTAR, RE-CHECAR processos que chegaram ***
+
         while lista and lista[0].tempo_chegada <= tempo_atual:
             fila.append(lista.pop(0))
 
@@ -159,12 +156,12 @@ def RoundRobin2(lista_processos, quantum=5, tempo_max=10, processos_max=100):
 
             tempo_atual = fim
 
-            # *** Depois de avançar o tempo, RE-CHECAR de novo! ***
+
             while lista and lista[0].tempo_chegada <= tempo_atual:
                 fila.append(lista.pop(0))
 
             if proc.tempo_execucao > 0:
-                fila.append(proc)  # volta para o fim
+                fila.append(proc)
             else:
                 processos_escalonados += 1
 
@@ -177,7 +174,7 @@ def Priority_Preemptive(lista_processos, tempo_max=10, processos_max=100):
     tempo_atual = 0
     ordem_execucao = []
     processos_escalonados = 0
-    lista = copy.deepcopy(lista_processos)  # ← copia completa, objetos independentes
+    lista = copy.deepcopy(lista_processos)
 
     lista.sort(key=lambda p: p.tempo_chegada)
     fila = []
@@ -185,12 +182,12 @@ def Priority_Preemptive(lista_processos, tempo_max=10, processos_max=100):
     processo_atual = None
 
     while (lista or fila or processo_atual) and tempo_atual < tempo_max and processos_escalonados < processos_max:
-        # Adiciona processos que chegaram até agora
+ 
         while lista and lista[0].tempo_chegada <= tempo_atual:
             fila.append(lista.pop(0))
 
         if processo_atual:
-            fila.append(processo_atual)  # Se o processo atual ainda não acabou, volta pra fila
+            fila.append(processo_atual)
 
         if fila:
             fila.sort(key=lambda p: (p.prioridade, p.tempo_chegada))
@@ -201,7 +198,6 @@ def Priority_Preemptive(lista_processos, tempo_max=10, processos_max=100):
             processo_atual = None
             continue
 
-        # Executa 1 unidade de tempo
         inicio = tempo_atual
         fim = inicio + 1
 
