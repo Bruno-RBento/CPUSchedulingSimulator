@@ -13,6 +13,8 @@ from algoritmos import (
     RoundRobin2,
     Priority_Preemptive,
     Priority_Non_Preemptive,
+    Rate_monotonic,
+    Edf
 )
 
 from processo import (
@@ -254,8 +256,11 @@ def iniciar_simulacao():
         if algoritmo.startswith("RT Rate Monotonic"):
             gantt_data = Rate_monotonic(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
             mostrar_gantt(gantt_data)
+
         elif algoritmo.startswith("EDF (Earliest Deadline First)"):
-            return
+            gantt_data = Edf(processos, tempo_max=int(max_time_var.get()), processos_max=int(process_count_var.get()))
+            mostrar_gantt(gantt_data)
+
         elif algoritmo.startswith("Multilevel Queue Scheduling"):
             return
 

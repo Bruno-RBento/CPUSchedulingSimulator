@@ -280,3 +280,99 @@ def Priority_Non_Preemptive(lista_processos, tempo_max=10, processos_max=100):
     
     return ordem_execucao
 
+def Rate_monotonic(lista_processos, tempo_max=10, processos_max=100):
+    tempo = 0
+    ordem_execucao = []
+    
+    for p in lista_processos:
+        if not hasattr(p, 'tempo_restante') or p.tempo_restante is None:
+            p.tempo_restante = p.tempo_execucao
+        if hasattr(p, 'periodo') and p.periodo is not None:
+            p.proxima_chegada = p.tempo_chegada + p.periodo
+        else:
+            
+            p.proxima_chegada = float('inf')
+    
+    while tempo < tempo_max:
+        
+        for p in lista_processos:
+            if hasattr(p, 'periodo') and p.proxima_chegada <= tempo and p.tempo_restante <= 0:
+                p.tempo_restante = p.tempo_execucao
+                p.proxima_chegada += p.periodo
+        
+        
+        prontos = [p for p in lista_processos 
+                  if p.tempo_chegada <= tempo and p.tempo_restante > 0]
+        
+        
+        prontos.sort(key=lambda p: (p.periodo if hasattr(p, 'periodo') else float('inf'), p.tempo_chegada))
+        
+        if prontos:
+            p = prontos[0]
+            inicio = tempo
+            tempo_exec = min(1, p.tempo_restante, tempo_max - tempo)
+            fim = inicio + tempo_exec
+            p.tempo_restante -= tempo_exec
+            
+            ordem_execucao.append({
+                "id": p.pid,
+                "start": inicio,
+                "end": fim
+            })
+            
+            tempo = fim
+        else:
+            tempo += 1
+    
+    return ordem_execucao
+
+def Edf(lista_processos, tempo_max=10, processos_max=100):
+    tempo = 0
+    ordem_execucao = []
+    
+    
+    for p in lista_processos:
+        if not hasattr(p, 'tempo_restante') or p.tempo_restante is None:
+            p.tempo_restante = p.tempo_execucao
+        if hasattr(p, 'periodo') and p.periodo is not None:
+            
+            p.prazo = p.tempo_chegada + p.periodo
+            p.proxima_chegada = p.tempo_chegada + p.periodo
+        else:
+            
+            p.prazo = float('inf')
+            p.proxima_chegada = float('inf')
+    
+    while tempo < tempo_max:
+        
+        for p in lista_processos:
+            if hasattr(p, 'periodo') and p.proxima_chegada <= tempo and p.tempo_restante <= 0:
+                p.tempo_restante = p.tempo_execucao
+                p.prazo = p.proxima_chegada + p.periodo
+                p.proxima_chegada += p.periodo
+        
+        
+        prontos = [p for p in lista_processos 
+                  if p.tempo_chegada <= tempo and p.tempo_restante > 0]
+        
+        
+        prontos.sort(key=lambda p: (p.prazo, p.tempo_chegada))
+        
+        if prontos:
+            p = prontos[0]
+            inicio = tempo
+            tempo_exec = min(1, p.tempo_restante, tempo_max - tempo)
+            fim = inicio + tempo_exec
+            p.tempo_restante -= tempo_exec
+            
+            ordem_execucao.append({
+                "id": p.pid,
+                "start": inicio,
+                "end": fim
+            })
+            
+            tempo = fim
+        else:
+            tempo += 1
+    
+    return ordem_execucao
