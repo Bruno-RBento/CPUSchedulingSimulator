@@ -5,7 +5,7 @@ import plotly.express as px
 import pandas as pd
 import threading
 from PIL import Image, ImageTk
-
+from gerador import gerar_processos as gerar_processos_aleatorios
 
 from gannt import gerar_grafico_png
 
@@ -62,9 +62,77 @@ def alternar_modo(modo):
     else:
         gerar_frame.pack(pady=5, fill='x', padx=10)
 
-def gerar_processos(tipo):
-    messagebox.showinfo("Gerar", f"Gerar processos {tipo} com distribuições selecionadas.")
 
+from PIL import Image, ImageTk
+from gerador import gerar_processos as gerar_processos_aleatorios
+
+from gannt import gerar_grafico_png
+
+from importcsv  import importar_csv
+from algoritmos import (
+    FCFS4,
+    ShortestJob3,
+    RoundRobin2,
+    Priority_Preemptive,
+    Priority_Non_Preemptive
+)
+
+
+
+root = tk.Tk()
+root.title("CPU Scheduling Simulator")
+root.geometry("800x700")
+
+algorithm_var = tk.StringVar()
+simulation_mode = tk.StringVar()
+quantum_var = tk.StringVar()
+max_time_var = tk.StringVar()
+process_count_var = tk.StringVar()
+arrival_dist_var = tk.StringVar()
+burst_dist_var = tk.StringVar()
+
+
+modo_entrada_var = tk.StringVar(value="importar")
+tipo_processo_var = tk.StringVar(value="aperiodico")
+
+processos = []
+
+main_frame = ttk.Frame(root)
+main_frame.pack(pady=10)
+
+columns_frame = ttk.Frame(root)
+columns_frame.pack(fill='both', expand=True, padx=10, pady=10)
+
+left_frame = ttk.Frame(columns_frame)
+left_frame.pack(side='left', fill='y', expand=False, padx=(0, 10))
+
+right_frame = ttk.Frame(columns_frame)
+right_frame.pack(side='right', fill='both', expand=True)
+
+
+def alternar_modo(modo):
+    tipo_frame.pack_forget()
+    import_frame.pack_forget()
+    gerar_frame.pack_forget()
+
+    if modo == "importar":
+        tipo_frame.pack(pady=5)
+        import_frame.pack(pady=5)
+    else:
+        gerar_frame.pack(pady=5, fill='x', padx=10)
+        
+def gerar_processos(tipo):
+
+    processos.clear()
+    processos.extend(gerar_processos_aleatorios(
+        int(process_count_var.get()),
+        int(max_time_var.get()),
+        arrival_dist=arrival_dist_var.get(),
+        burst_dist=burst_dist_var.get(),
+        tipo=tipo
+    ))
+    update_process_queue()
+    messagebox.showinfo("Sucesso", "Processos gerados com sucesso!")
 
 def converter_processos_para_tabela(processos):
     """
