@@ -3,9 +3,9 @@ import random
 def maiorID(lista):
     maior = 0
     for i in range(len(lista)):
-        if len(lista[i]) == 2:  # Caso a tupla tenha apenas 2 elementos
+        if len(lista[i]) == 2: 
             id, tempo = lista[i]
-        elif len(lista[i]) == 3:  # Caso a tupla tenha 3 elementos
+        elif len(lista[i]) == 3:  
             id, tempo, prioridade = lista[i]
         if id > maior:
             maior = id
@@ -38,8 +38,8 @@ def RoundRobin2(lista_processos, quantum=5,tempo_max=10):
         num = random.randint(1, 100)
         if num <= 15:
             novo_burst = round(random.normalvariate(10, 2), 2)
-            novo_burst = max(novo_burst, 0.5)  # Garante que o novo_burst não seja menor que 0.5
-            novo_burst = min(novo_burst, tempo_max)  # Garante que o novo_burst não ultrapasse o tempo_max
+            novo_burst = max(novo_burst, 0.5) 
+            novo_burst = min(novo_burst, tempo_max) 
             novo_processo = (id_atual, novo_burst)
             lista_processos.append(novo_processo)
             print("Processo com o ID "+str(id_atual)+" adicionado com sucesso")
@@ -78,8 +78,8 @@ def ShortestJob2(lista_processos,tempo_max=10):
         num = random.randint(1, 100)
         if num <= 15:
             novo_burst = round(random.normalvariate(10, 2), 2)
-            novo_burst = max(novo_burst, 0.5)  # Garante que o novo_burst não seja menor que 0.5
-            novo_burst = min(novo_burst, tempo_max)  # Garante que o novo_burst não ultrapasse o tempo_max
+            novo_burst = max(novo_burst, 0.5) 
+            novo_burst = min(novo_burst, tempo_max)  
             novo_processo = (id_atual, novo_burst)
             lista_processos.append(novo_processo)
             print("Processo com o ID "+str(id_atual)+" adicionado com sucesso")
@@ -162,8 +162,8 @@ def Priority_NaoPreemptivo2(lista_processos, tempo_max=10):
         num = random.randint(1, 100)
         if num <= 15:
             novo_burst = round(random.normalvariate(10, 2), 2)
-            novo_burst = max(novo_burst, 0.5)  # Garante que o novo_burst não seja menor que 0.5
-            novo_burst = min(novo_burst, tempo_max)  # Garante que o novo_burst não ultrapasse o tempo_max
+            novo_burst = max(novo_burst, 0.5)  
+            novo_burst = min(novo_burst, tempo_max)  
             nova_prioridade = random.randint(1, 10)
             novo_processo = (id_atual, novo_burst, nova_prioridade)
             lista_processos.append(novo_processo)

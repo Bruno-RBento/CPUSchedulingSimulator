@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
-
+from gerador import gerar_processos as gerar_processos_aleatorios
 
 from gannt import gerar_grafico_png
 
